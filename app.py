@@ -13,20 +13,32 @@ st.set_page_config(page_title="ChurnGuard AI", layout="wide")
 @st.cache_data
 def load_and_clean_data():
     df = pd.read_csv("churn.csv")
+    
+    # Boşlukları ve hatalı metinleri sayısal veriye dönüştür
     df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
-    df['TotalCharges'].fillna(df['TotalCharges'].median(), inplace=True)
-    df.drop(['customerID'], axis=1, inplace=True)
+    df['MonthlyCharges'] = pd.to_numeric(df['MonthlyCharges'], errors='coerce')
+    df['tenure'] = pd.to_numeric(df['tenure'], errors='coerce')
+    
+    # En anlamlı 5 sütunu seçiyoruz
     selected_features = ['tenure', 'MonthlyCharges', 'TotalCharges', 'SeniorCitizen', 'PaperlessBilling', 'Churn']
     df = df[selected_features]
+    
+    # 🚨 KRİTİK DÜZELTME: Veride kalan TÜM boş (NaN) değerleri kesin olarak temizle/sil
+    df.dropna(inplace=True)
+    
+    # Kategorik verileri 1 ve 0'a dönüştür
     df['PaperlessBilling'] = df['PaperlessBilling'].map({'Yes': 1, 'No': 0})
     df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
+    
+    # Dönüşüm sonrası oluşabilecek olası boşlukları 0 ile doldur
+    df.fillna(0, inplace=True)
     return df
 
 df = load_and_clean_data()
 X = df.drop('Churn', axis=1)
 y = df['Churn']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_split=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 models = {
     "Random Forest (Rastgele Orman)": RandomForestClassifier(max_depth=5, random_state=42),
@@ -86,14 +98,22 @@ with col2:
 st.markdown("---")
 st.subheader("💡 Yapay Zekâ Bu Kararı Neden Verdi? (SHAP Açıklaması)")
 
+# 1. Eksik olan SHAP Hesaplama Motorunu Geri Ekliyoruz
 explainer = shap.TreeExplainer(model_results["Random Forest (Rastgele Orman)"]["object"]) if "Random Forest" in selected_model else shap.LinearExplainer(model_results["Logistic Regression (Lojistik Regresyon)"]["object"], X_train)
 shap_vals = explainer(input_data)
 
+# 2. Boyut Hatasını Çözen Grafik Kısmı
+if "Random Forest" in selected_model:
+    sv = shap_vals.values[0][:, 1] if len(shap_vals.values[0].shape) == 2 else shap_vals.values[0]
+else:
+    sv = shap_vals.values[0]
+
 fig = px.bar(
-    x=shap_vals.values[0],
+    x=sv,
     y=X.columns,
     orientation='h',
-    color=shap_vals.values[0],
+    labels={"x": "Riske Etki Boyutu (Sağa doğru risk artırır, Sola doğru azaltır)", "y": "Müşteri Özellikleri"},
+    color=sv,
     color_continuous_scale=px.colors.sequential.RdBu_r
 )
 st.plotly_chart(fig, use_container_width=True)
