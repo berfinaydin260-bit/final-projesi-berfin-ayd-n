@@ -15,6 +15,7 @@
 ChurnGuard AI, Kaggle üzerindeki gerçek müşteri verilerini kullanarak iki farklı makine öğrenmesi modeli eğitir. CRM uzmanının web arayüzünden girdiği müşteri bilgilerine dayanarak anlık terk riski hesaplar. En önemlisi, **SHAP (Explainable AI)** kütüphanesini entegre ederek yapay zekânın bu kararı hangi faktörlere (yüksek fatura, üyelik süresi vb.) dayanarak verdiğini grafiklerle şeffafça açıklar.
 
 ##  Kullanılan Teknolojiler
+- Bu Ürünü yaparken geminiden yardım aldım.
 - **Programlama Dili:** Python
 - **Arayüz Geliştirme:** Streamlit
 - **Yapay Zekâ ve Veri Bilimi:** Scikit-learn (Random Forest, Logistic Regression), SHAP (Açıklanabilir YZ)
@@ -35,3 +36,8 @@ Uygulamayı yerelde çalıştırmak için aşağıdaki adımları takip edebilir
 2. Gerekli kütüphaneleri yükleyin:
    ```bash
    pip install streamlit pandas numpy scikit-learn shap plotly
+   ## 📹 Tanıtım Videosu Linki
+Geliştirilen ChurnGuard AI sisteminin canlı çalışma testini ve model performans analizlerini içeren tanıtım videosuna aşağıdaki bağlantıdan ulaşabilirsiniz:
+
+👉 [Google Drive Tanıtım Videosu İzleme Linki](https://drive.google.com/file/d/1GqX8DcYAsfzgwlO97YVJulbLgmld4721/view?usp=drive_link)
+
